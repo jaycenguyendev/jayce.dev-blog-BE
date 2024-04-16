@@ -1,10 +1,10 @@
-import { User } from '@/databases/entities/User';
 import { RequestLoginDto, ResponseLoginDto } from './AuthDto';
 import BadRequestException from '@/common/exceptions/BadRequestException';
 import { PasswordUtils } from '@/common/utils/PasswordUtil';
 import UnauthorizedException from '@/common/exceptions/UnauthorizedException';
 import JwtUtils from '@/common/utils/JwtUtil';
 import { MsgIds, logger } from '@/common/logger/logger';
+import { User } from '@/databases/entities/User';
 
 class AuthService {
   /**
@@ -21,7 +21,7 @@ class AuthService {
       select: {
         username: true,
         password: true,
-      }
+      },
     });
 
     if (!userInfo) {
@@ -65,7 +65,7 @@ class AuthService {
       },
       select: {
         username: true,
-      }
+      },
     });
 
     if (!userInfo) {

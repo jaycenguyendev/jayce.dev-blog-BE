@@ -17,13 +17,109 @@ ALTER SCHEMA dev OWNER TO postgres;
 COMMENT ON SCHEMA dev IS 'standard public schema';
 
 CREATE TABLE dev.user (
-    username character varying(20) NOT NULL,
-    password character varying(64) NOT NULL
+    "id" BIGSERIAL PRIMARY KEY,
+    "firstName" VARCHAR(50),
+    "middleName" VARCHAR(50),
+    "lastName" VARCHAR(50),
+    "mobile" VARCHAR(15) UNIQUE,
+    "email" VARCHAR(50) UNIQUE,
+    "passwordHash" VARCHAR(32) NOT NULL,
+    "registeredAt" TIMESTAMP NOT NULL,
+    "lastLogin" TIMESTAMP,
+    "intro" TEXT,
+    "profile" TEXT
 );
 
-ALTER TABLE dev.user OWNER TO postgres;
+CREATE TABLE dev.post(
+    "id" BIGSERIAL PRIMARY KEY,
+    "authorId" BIGINT NOT NULL,
+    "parentId" BIGINT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "metaTitle" VARCHAR(255) NULL,
+    "slug" VARCHAR(255) NOT NULL,
+    "summary" TEXT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT FALSE,
+    "createdAt" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+    "publishedAt" TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+    "content" TEXT NULL,
+    CONSTRAINT "fk_post_user" FOREIGN KEY ("authorId") REFERENCES "user" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
 
-INSERT INTO dev.user VALUES ('user', '$2a$12$cHIVMPLpFu8nkTSsAzvfauGyzvilzDD3P1hMOuugbcS0J8L.30rBe');
+CREATE UNIQUE INDEX "uq_slug" ON "post" ("slug");
+CREATE INDEX "idx_post_user" ON "post" ("authorId");
+CREATE INDEX "idx_post_parent" ON "post" ("parentId");
 
-ALTER TABLE ONLY dev.user
-    ADD CONSTRAINT pk_user PRIMARY KEY (username);
+ALTER TABLE "post" ADD CONSTRAINT "fk_post_parent" FOREIGN KEY ("parentId") REFERENCES "post" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+
+CREATE TABLE dev.post_meta(
+    "id" BIGSERIAL PRIMARY KEY,
+    "postId" BIGINT NOT NULL,
+    "key" VARCHAR(255) NOT NULL,
+    "content" TEXT NULL,
+    CONSTRAINT "fk_meta_post" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+CREATE INDEX "idx_meta_post" ON "post_meta" ("postId");
+CREATE UNIQUE INDEX "uq_post_meta" ON "post_meta" ("postId", "key");
+
+CREATE TABLE dev.tag(
+    "id" BIGSERIAL PRIMARY KEY,
+    "title" VARCHAR(255) NOT NULL,
+    "metaTitle" VARCHAR(255) NULL,
+    "slug" VARCHAR(255) NOT NULL,
+    "content" TEXT NULL,
+);
+
+
+CREATE TABLE dev.post_tag(
+    "postId" BIGINT NOT NULL,
+    "tagId" BIGINT NOT NULL,
+    PRIMARY KEY ("postId", "tagId"),
+    CONSTRAINT "fk_pt_post" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT "fk_pt_tag" FOREIGN KEY ("tagId") REFERENCES "tag" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE INDEX "idx_pt_tag" ON "post_tag" ("tagId");
+CREATE INDEX "idx_pt_post" ON "post_tag" ("postId");
+
+
+CREATE TABLE dev.category(
+    "id" BIGSERIAL PRIMARY KEY,
+    "parentId" BIGINT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "metaTitle" VARCHAR(255) NULL,
+    "slug" VARCHAR(255) NOT NULL,
+    "content" TEXT NULL,
+    CONSTRAINT "fk_category_parent" FOREIGN KEY ("parentId") REFERENCES "category" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE INDEX "idx_category_parent" ON "category" ("parentId");
+
+
+CREATE TABLE dev.post_category(
+    "postId" BIGINT NOT NULL,
+    "categoryId" BIGINT NOT NULL,
+    PRIMARY KEY ("postId", "categoryId"),
+    CONSTRAINT "fk_pc_post" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT "fk_pc_category" FOREIGN KEY ("categoryId") REFERENCES "category" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE INDEX "idx_pc_category" ON "post_category" ("categoryId");
+CREATE INDEX "idx_pc_post" ON "post_category" ("postId");
+
+CREATE TABLE dev.post_comment(
+    "id" BIGSERIAL PRIMARY KEY,
+    "postId" BIGINT NOT NULL,
+    "parentId" BIGINT,
+    "title" VARCHAR(255) NOT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT FALSE,
+    "createdAt" TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "publishedAt" TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+    "content" TEXT NULL,
+    CONSTRAINT "fk_comment_post" FOREIGN KEY ("postId") REFERENCES "post" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT "fk_comment_parent" FOREIGN KEY ("parentId") REFERENCES "post_comment" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE INDEX "idx_comment_post" ON "post_comment" ("postId");
+CREATE INDEX "idx_comment_parent" ON "post_comment" ("parentId");
