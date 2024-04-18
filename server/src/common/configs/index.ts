@@ -19,7 +19,7 @@ class ConfigService {
       password: this.getEnv('DB_PASSWORD'),
       database: this.getEnv('DB_DATABASE'),
       type: 'postgres',
-      // synchronize: this.isDevelopment ? true : false,
+      synchronize: this.isDevelopment ? true : false,
       logging: this.isDevelopment,
     };
   }

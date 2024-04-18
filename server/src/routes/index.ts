@@ -1,9 +1,8 @@
+import postRouter from '@/routes/PostRouter';
 import { Router } from 'express';
-import AuthRouter from './AuthRouter';
 
 const router = Router();
 
-router.use('/auth', AuthRouter);
-// router.use('/example', authMiddleware, HomeRouter);
+router.use('/posts', postRouter);
 
 export default router;
