@@ -16,6 +16,7 @@ class PostController {
   async getPosts(req: Request, res: ResponseCustom, next: NextFunction) {
     try {
       const data = await PostService.getPosts();
+      console.log('data', data)
       return res.status(HttpStatusCode.OK).json({
         httpStatusCode: HttpStatusCode.OK,
         data,
