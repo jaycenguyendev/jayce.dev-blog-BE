@@ -3,9 +3,10 @@ import { ResponsePostDto } from '@/modules/post/PostDto';
 import postsRepository from '@/modules/post/PostRepository';
 
 class PostService {
-  async getPosts(paginationQuery?: PaginationQuery): Promise<ResponsePostDto['post']> {
-    const posts = await postsRepository.getPosts(paginationQuery);
-    return new ResponsePostDto(posts).post;
+  async getPosts(paginationQuery?: PaginationQuery): Promise<ResponsePostDto> {
+    const { posts, totalPosts } = await postsRepository.getPosts(paginationQuery);
+    const totalPages = paginationQuery?.limit && Math.ceil(totalPosts / paginationQuery?.limit);
+    return new ResponsePostDto(posts, totalPages);
   }
 }
 export default new PostService();

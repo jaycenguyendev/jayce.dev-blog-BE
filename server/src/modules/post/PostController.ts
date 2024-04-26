@@ -18,17 +18,19 @@ class PostController {
   async getPosts(req: Request, res: ResponseCustom, next: NextFunction) {
     try {
       const { query } = req
-      const limit = Number(query?.limit);
-      const skip = (Number(query?.page) - 1) * limit;
+      const limit = Math.abs(Number(query?.limit));
+      const skip = Math.abs((Number(query?.page) - 1) * limit);
 
-      const paginationQuery: PaginationQuery | undefined = limit && skip ? {
-        skip,
-        limit
-      } : undefined;
-
+      let paginationQuery: PaginationQuery | undefined = undefined;
+      if ((limit >= 0 || skip >= 0) && (!isNaN(limit) && !isNaN(skip))) {
+        paginationQuery = {
+          skip,
+          limit
+        }
+      }
       const data = await PostService.getPosts(paginationQuery);
 
-      let delayres = await delay(3000);
+      // let delayres = await delay(2000);
       return res.status(HttpStatusCode.OK).json({
         httpStatusCode: HttpStatusCode.OK,
         data,

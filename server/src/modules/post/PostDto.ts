@@ -2,9 +2,11 @@ import { Post } from '@/databases/entities/Post';
 
 // ResponsePostDto represents the post data
 export class ResponsePostDto {
-  post: Array<Partial<Post>>;
+  posts: Array<Partial<Post>>;
+  totalPages?: number;
 
-  constructor(data: Array<Partial<Post>>) {
-    this.post = data;
+  constructor(posts: Array<Partial<Post>>, totalPages?: number) {
+    this.posts = posts;
+    this.totalPages = totalPages
   }
 }
