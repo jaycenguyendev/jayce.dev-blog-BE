@@ -8,5 +8,10 @@ class PostService {
     const totalPages = paginationQuery?.limit && Math.ceil(totalPosts / paginationQuery?.limit);
     return new ResponsePostDto(posts, totalPages);
   }
+
+  async searchPost(query) {
+    const posts = await postsRepository.searchPost(query)
+    return new ResponsePostDto(posts);
+  }
 }
 export default new PostService();

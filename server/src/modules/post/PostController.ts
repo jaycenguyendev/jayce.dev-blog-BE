@@ -18,6 +18,15 @@ class PostController {
   async getPosts(req: Request, res: ResponseCustom, next: NextFunction) {
     try {
       const { query } = req
+
+      if (query?.post) {
+        const posts = await PostService.searchPost(query.post);
+        return res.status(HttpStatusCode.OK).json({
+          httpStatusCode: HttpStatusCode.OK,
+          data: posts,
+        });
+      }
+
       const limit = Math.abs(Number(query?.limit));
       const skip = Math.abs((Number(query?.page) - 1) * limit);
 
@@ -28,12 +37,12 @@ class PostController {
           limit
         }
       }
-      const data = await PostService.getPosts(paginationQuery);
+      const posts = await PostService.getPosts(paginationQuery);
 
-      // let delayres = await delay(2000);
+      let delayres = await delay(2000);
       return res.status(HttpStatusCode.OK).json({
         httpStatusCode: HttpStatusCode.OK,
-        data,
+        data: posts,
       });
     } catch (error) {
       next(error);

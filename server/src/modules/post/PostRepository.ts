@@ -1,8 +1,10 @@
+import { pgDatabase } from '@/databases/PgDatabase';
 import { Post } from '@/databases/entities/Post';
 import { PaginationQuery } from '@/modules/post/Post.type';
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, Raw } from 'typeorm';
 
 class PostRepository {
+  private postRepository = pgDatabase.dataSource.getRepository(Post);
   async getPosts(paginationQuery?: PaginationQuery) {
     const query: FindManyOptions = {
       skip: paginationQuery?.skip,
@@ -23,6 +25,22 @@ class PostRepository {
       posts,
       totalPosts
     };
+  }
+
+  async searchPost(query) {
+    return await this.postRepository.find({
+      relations: {
+        tags: true
+      },
+      order: {
+        createdAt: "DESC"
+      },
+      where: {
+        title: Raw((alias) => `LOWER(${alias}) Like LOWER(:value)`, {
+          value: `%${query}%`,
+        })
+      },
+    });
   }
 }
 export default new PostRepository();
