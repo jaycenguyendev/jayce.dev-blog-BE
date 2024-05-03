@@ -15,6 +15,19 @@ class TagController {
       next(error)
     }
   }
+
+  async getTagsBySlug(req: Request, res: ResponseCustom, next: NextFunction) {
+    try {
+      const { slug } = req.params
+      const data = await TagService.getTagsBySlug(slug);
+      return res.status(HttpStatusCode.OK).json({
+        httpStatusCode: HttpStatusCode.OK,
+        data
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 export default new TagController();
